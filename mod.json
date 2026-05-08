@@ -1,0 +1,26 @@
+{
+	"geode": "5.4.1",
+	"gd": {
+		"win": "2.2081",
+		"android": "2.2081",
+		"mac": "2.2081",
+		"ios": "2.2081"
+	},
+	"id": "michael.sculptorv2",
+	"name": "SculptorV2",
+	"version": "v1.0.0",
+	"developer": "Michael",
+	"description": "",
+	"dependencies": {
+		"geode.node-ids": ">=v1.23.3",
+		"alphalaneous.editortab_api": {
+			"version": ">=v2.1.3",
+			"required": true
+		}
+	},
+	"resources": {
+		"sprites": [
+			"res/*.png"
+		]
+	}
+}
