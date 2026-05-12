@@ -1,84 +1,58 @@
 #pragma once
 
 #include <Geode/Geode.hpp>
+#include "../lib/Geometry.hpp"
 
 
 using namespace geode::prelude;
+using namespace Sculptor;
+
+const float gdUnit = 30.f;
 
 class Layer;
+
+enum class GDProperty {
+    ID,
+    X,
+    Y,
+    Rotation,
+    ScaleX,
+    ScaleY,
+    ZLayer,
+    Color,
+    SecondaryColor,
+    Hue,
+    Saturation,
+    Value,
+    Groups
+};
 
 class GDProperties {
 public:
 
-    std::unordered_map<std::string, std::any> properties;
+    std::unordered_map<GDProperty, std::any> properties;
 
-    GDProperties(std::unordered_map<std::string, std::any> properties) {
+    GDProperties(std::unordered_map<GDProperty, std::any> properties) {
         this->properties = properties;
     }    
 
-    GameObject* applyTo(GameObject* object);
+    GameObject* applyTo(GameObject* object) const;
 
-    void applyLayerPropertyOffsets(Layer* layer);
+    void applyGenericLayerProperties(Layer* layer);
 
-  
+    static GDProperties fromRightTriangle(const RightTriangle& triangle, bool inflateEpsilon = false);
+
+    static std::vector<GDProperties> fromRightTriangleInterior(const RightTriangle& triangle);
+
+    static std::vector<GDProperties> fromRightTriangleExterior(const RightTriangle& triangle);
+
+    static std::optional<GDProperties> fromLine(const Line& line, float width);
 
     
 };
 
 
 
-
-inline std::unordered_map<std::string, std::string> GDPropertyID = {
-    {"ID", "1"},
-    {"x", "2"},
-    {"y", "3"},
-    {"flip-horizontal", "4"},
-    {"flip-vertical", "5"},
-    {"rotation", "6"},
-    {"trigger-time", "10"},
-    {"editor-layer", "20"},
-    {"color", "21"},
-    {"color-secondary", "22"},
-    {"z-layer", "24"},
-    {"z-layer-sub", "25"},
-    {"scale", "32"},
-    {"hsv-enable", "41"},
-    {"hsv", "43"},
-    {"groups", "57"},
-    {"scale-x", "128"},
-    {"scale-y", "129"}
-};
-
-inline std::unordered_map<std::string, float> GDPropertyDefault = {    
-    {"x", 0},
-    {"y", 0},    
-    {"rotation", 0},     
-    {"scale-x", 1},
-    {"scale-y", 1}
-};
-
-inline std::unordered_map<std::string, float> layerPropertyDefault = {
-    {"test", 0},
-    {"offset-x", 0},
-    {"offset-y", 0},
-    {"offset-rotation", 0},
-    {"offset-scale-x", 0},
-    {"offset-scale-y", 0},
-    {"offset-hue", 0},
-    {"offset-saturation", 0},
-    {"offset-value", 0},
-
-    {"color", 1},
-    {"z-layer", 1},
-    {"width", 1.5},
-    {"glow-width", 0.5},
-    {"triangle-texture", 0},
-    {"ID", 1},
-    {"spacing", 25},    
-    {"normal-rotation", 0},
-    {"strip-width", 10},
-    {"strip-angle", 0}
-};
 
 
 

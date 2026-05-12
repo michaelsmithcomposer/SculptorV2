@@ -106,7 +106,7 @@ void NumberInput::handleMouseData(MouseInputData data) {
             setString("");
             typing = true;
         }
-        else {
+        else if (typing) {
             setValue(getValue());
             typing = false;
         }

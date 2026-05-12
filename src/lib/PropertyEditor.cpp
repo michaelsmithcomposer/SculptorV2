@@ -47,12 +47,12 @@ void PropertyEditor::createEditor() {
     node->setContentSize(size);
     node->setLayout(RowLayout::create());
 
-    valueInput = NumberInput::create();    
+    valueInput = NumberInput::create(LayerProperty::info[property->name].filter);
     valueInput->setValue(property->getValue());
     valueInput->valueCallback = [this](float value) { this->property->setValue(value); };
     node->addChild(valueInput);
 
-    modInput = NumberInput::create(CommonFilter::Float, 0);
+    modInput = NumberInput::create(LayerProperty::info[property->name].filter);
     modInput->setValue(property->getModValue(modSource));
     modInput->valueCallback = [this](float value) { this->property->setModValue(modSource, value); };
     node->addChild(modInput);
@@ -60,7 +60,7 @@ void PropertyEditor::createEditor() {
 
     addChild(node);
 
-    auto labelProperty = CCLabelBMFont::create(this->property->name.c_str(), "chatFont.fnt");
+    auto labelProperty = CCLabelBMFont::create(LayerProperty::info[property->name].label.c_str(), "chatFont.fnt");
     labelProperty->setScale(0.75);
     addChildAtPosition(labelProperty, Anchor::Top, { 0, -4 });
 

@@ -39,4 +39,14 @@ class $modify(SculptorEditorUI, EditorUI) {
 		return true;
 	}
 
+	void selectObject(GameObject* object, bool ignoreFilter) {
+		if (Manager::get()->inTab()) return;
+		EditorUI::selectObject(object, ignoreFilter);
+	}
+
+	void selectObjects(CCArray* objects, bool ignoreFilter) {
+		if (Manager::get()->inTab()) return;
+		EditorUI::selectObjects(objects, ignoreFilter);
+	}
+
 };

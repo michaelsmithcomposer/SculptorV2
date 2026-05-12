@@ -7,6 +7,7 @@
 
 using namespace geode::prelude;
 using namespace Clipper2Lib;
+using namespace Sculptor;
 
 Manager* Manager::create() {
     auto node = new Manager();
@@ -34,7 +35,19 @@ Manager* Manager::get() {
 
 void Manager::update(float dt) {   
 
-   
+    time += dt;
+
+   /* if (selectedForm) {
+        int count = selectedForm->getCurves().size();
+        for (int i = 0; i < count; i++) {
+            selectedForm->setPoint(i, 0, ccp(sinTime(static_cast<float>(i) / count, 400), i * 15));
+            selectedForm->setPoint(i, 1, ccp(sinTime(static_cast<float>(i) / count, 400), i * 20));
+        }
+        
+    }*/
+    
+
+
 }
 
 void Manager::onTabEnter() {
@@ -49,15 +62,14 @@ void Manager::onTabExit() {
 
 void Manager::createTab() {
 
-    Form* form = Form::create();
-    form->paths = { { {0, 0}, {25, 150}, {150, 50} } };
-    Layer* layer = form->createLayer(LayerStyle::Corners);
-    form->createLayer(LayerStyle::Corners2);
+    Form* form = Form::create({ BezierCurve({ccp(0, 0), ccp(50, 0), ccp(100, 0)}), BezierCurve({ccp(100, 0), ccp(100, 100)}), BezierCurve({ccp(100, 100), ccp(75, 100), ccp(50, 100),ccp(25, 100), ccp(0, 100)}), BezierCurve({ccp(0, 100), ccp(0, 0)}) });
+    //Form* form = Form::create({ BezierCurve({ccp(0, 0), ccp(50, 0), ccp(100, 0)}), BezierCurve({ccp(100, 0), ccp(100, 50), ccp(100, 100)}), BezierCurve({ccp(100, 100), ccp(50, 100), ccp(0, 100)}), BezierCurve({ccp(0, 100), ccp(0, 50), ccp(0, 0)}) });
+    //Form* form = Form::create({ BezierCurve({ccp(0, 0), ccp(100, 0)}), BezierCurve({ccp(100, 0), ccp(100, 100)}), BezierCurve({ccp(100, 100), ccp(0, 100)}), BezierCurve({ccp(0, 100), ccp(0, 0)}) });
+    Layer* layer = form->createLayer(LayerStyle::Solid);
+   
 
     selectedForm = form;
-    selectedLayer = layer;
-
-    log::info("init count: {}", selectedForm->layers.size());
+    selectedLayer = layer;   
 
     forms.push_back(form);
 
@@ -182,7 +194,7 @@ void Manager::updatePropertiesMenu() {
         menu->removeAllChildren();
     }
     if (selectedLayer) {
-        for (const auto& [i, propertyName] : std::views::enumerate(propertyNamesByStyle[selectedLayer->style])) {
+        for (const auto& [i, propertyName] : std::views::enumerate(Layer::propertyNamesByStyle(selectedLayer->style))) {
             LayerProperty* prop = selectedLayer->getProperty(propertyName);
             int row = i % 3;
             PropertyEditor* editor = PropertyEditor::create(prop);
@@ -223,7 +235,7 @@ void Manager::onModSelectButton(CCObject* sender) {
 
 ListenerResult Manager::handleScroll(double x, double y) {
 
-    if (alpha::editor_tabs::getCurrentTab().unwrapOrDefault() == "sculptor"_spr) {       
+    if (inTab()) {       
         if (layerScroll->boundingBox().containsPoint(page->convertToNodeSpace(getMousePos()))) {
             layerScroll->scrollLayer(-y * 4);
         }
