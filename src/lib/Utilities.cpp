@@ -44,3 +44,7 @@ bool rangeContains(float start, float end, float value) {
 	float max = std::max(start, end);
 	return ((value > min) || isClose(value, min)) && ((value < max) || (isClose(value, max)));
 }
+
+int safeModulo(int a, int b) {
+	return (b + (a % b)) % b;
+}

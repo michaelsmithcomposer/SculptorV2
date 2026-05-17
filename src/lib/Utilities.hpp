@@ -28,6 +28,8 @@ bool isClose(CCPoint a, CCPoint b, float precision = PRECISION_HIGH);
 
 bool rangeContains(float start, float end, float value);
 
+int safeModulo(int a, int b);
+
 
 
 

@@ -6,6 +6,14 @@
 class LayerProperty;
 enum class ModSource;
 
+namespace Sculptor {
+    class Property {
+    public:
+        std::string label;
+        float value;
+    };
+}
+
 class PropertyEditor : public CCNode {
 public:
 

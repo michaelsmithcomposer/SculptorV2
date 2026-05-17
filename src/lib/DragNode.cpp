@@ -25,7 +25,7 @@ bool DragNode::init() {
 
     setContentSize({ size, size });
     setAnchorPoint({ 0.5, 0.5 });
-    drawRect({ 0, 0, size, size }, {0.f, 0.f, 0.f, 0.f}, 0.25, {0.5, 0.5, 0.5, 1.0});
+    drawRect({ 0, 0, size, size }, {0.f, 0.f, 0.f, 0.f}, 0.25, {1.0, 1.0, 1.0, 0.35});
 
     return true;
 }
@@ -62,3 +62,7 @@ void DragNode::update(float dt) {
   
 }
 
+void DragNode::simulateClick() {
+    MouseInputData data = MouseInputData(MouseInputData::Button::Left, MouseInputData::Action::Press, 0, {});
+    handleMouseData(data);
+}

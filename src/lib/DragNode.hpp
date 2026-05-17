@@ -18,6 +18,8 @@ public:
 	std::function<void()> onMouseEnter;
 	std::function<void()> onMouseExit;
 
+	void simulateClick();
+
 private:
 
 	ListenerHandle mouseListener;

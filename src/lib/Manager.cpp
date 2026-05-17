@@ -54,10 +54,17 @@ void Manager::onTabEnter() {
     if (!page) {
         createTab();
     }
+    EditorUI::get()->getChildByIDRecursive("toolbar-categories-menu")->setVisible(false);
+    EditorUI::get()->getChildByIDRecursive("toolbar-toggles-menu")->setVisible(false);
+    EditorUI::get()->getChildByIDRecursive("spacer-line-left")->setVisible(false);
+    EditorUI::get()->getChildByIDRecursive("spacer-line-right")->setVisible(false);
 }
 
 void Manager::onTabExit() {
-
+    EditorUI::get()->getChildByIDRecursive("toolbar-categories-menu")->setVisible(true);
+    EditorUI::get()->getChildByIDRecursive("toolbar-toggles-menu")->setVisible(true);
+    EditorUI::get()->getChildByIDRecursive("spacer-line-left")->setVisible(true);
+    EditorUI::get()->getChildByIDRecursive("spacer-line-right")->setVisible(true);
 }
 
 void Manager::createTab() {
@@ -73,26 +80,27 @@ void Manager::createTab() {
 
     forms.push_back(form);
 
-	CCSize size = { 375, 90 };    
+	CCSize size = { 569, 90 };    
 
 	page = CCNode::create();
     page->setID("page"_spr);
 	page->setAnchorPoint({ 0.f, 0.f });
+    page->setPositionX(-96);
 	page->setContentSize(size);
 	page->setLayout(RowLayout::create()->setAxisAlignment(AxisAlignment::Between)->setAutoScale(false));    
 
-    {
-        float w = size.width / 9.f;
+    //{
+    //    float w = size.width / 9.f;
 
-        auto menu = CCMenu::create();
-        menu->setContentSize({ w, size.height });
-        menu->setLayout(ColumnLayout::create()->setAxisAlignment(AxisAlignment::Even)->setAxisReverse(true));
-        menu->addChild(CCMenuItemSpriteExtra::create(BasedButtonSprite::create(CCNode::create(), BaseType::Editor, 0, static_cast<int>(EditorBaseColor::Gray)), this, menu_selector(Manager::onButton)));
-        menu->addChild(CCMenuItemSpriteExtra::create(BasedButtonSprite::create(CCNode::create(), BaseType::Editor, 0, static_cast<int>(EditorBaseColor::Gray)), this, menu_selector(Manager::onButton)));
-        menu->updateLayout();
-        page->addChild(menu);
+    //    auto menu = CCMenu::create();
+    //    menu->setContentSize({ w, size.height });
+    //    menu->setLayout(ColumnLayout::create()->setAxisAlignment(AxisAlignment::Even)->setAxisReverse(true));
+    //    menu->addChild(CCMenuItemSpriteExtra::create(BasedButtonSprite::create(CCNode::create(), BaseType::Editor, 0, static_cast<int>(EditorBaseColor::Gray)), this, menu_selector(Manager::onButton)));
+    //    menu->addChild(CCMenuItemSpriteExtra::create(BasedButtonSprite::create(CCNode::create(), BaseType::Editor, 0, static_cast<int>(EditorBaseColor::Gray)), this, menu_selector(Manager::onButton)));
+    //    menu->updateLayout();
+    //    page->addChild(menu);
 
-    }
+    //}
     {
         float w = size.width * (2.f / 9.f);
 
@@ -112,7 +120,7 @@ void Manager::createTab() {
         page->addChild(scroll);
     }
     {
-        float w = size.width * (2.f / 3.f);
+        float w = size.width * (7.f / 9.f);
         float topH = 15;
 
         auto menu = CCNode::create();

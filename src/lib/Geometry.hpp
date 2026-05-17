@@ -31,6 +31,7 @@ namespace Sculptor {
 		CCPoint midpoint() const {
 			return lerp(0.5);
 		}
+		std::optional<float> inverseLerp(CCPoint) const;
 
 		bool coincident(const Line& other) const;
 		void shrink(float distance);
@@ -63,7 +64,12 @@ namespace Sculptor {
 		float length() const;
 		Clipper2Lib::PathD asPath() const;
 		static Sequence fromPath(Clipper2Lib::PathD path);		
-		Lines edges() const;		
+		Lines edges() const;	
+
+		bool containsPoint(const CCPoint& point) const { return !edgeIndicesContaining(point).empty(); }
+		std::vector<int> edgeIndicesContaining(const CCPoint& point) const;
+
+		std::optional<float> inverseLerp(const CCPoint& point) const;
 
 		CCRect boundingBox() const;
 
@@ -102,14 +108,16 @@ namespace Sculptor {
 		bool containsEdge(const Line& edge) const { return edgeIndex(edge).has_value(); }
 		std::optional<int> edgeIndex(const Line& edge) const;
 
-		bool containsPoint(const CCPoint& point) const { return !edgeIndicesContaining(point).empty(); }
+		bool containsEdgePoint(const CCPoint& point) const { return !edgeIndicesContaining(point).empty(); }
 		std::vector<int> edgeIndicesContaining(const CCPoint& point) const;		
+
+		bool contains(const CCPoint& point) const;
 
 		Lines edges() const;
 		static Poly fromBezierCurves(BezierCurves curves);
 
 		CCPoint normalAt(const CCPoint& point) const;
-		CCPoint projectionOf(const CCPoint& point);
+		CCPoint projectionOf(const CCPoint& point) const;
 	};
 
 	struct RightTriangle;

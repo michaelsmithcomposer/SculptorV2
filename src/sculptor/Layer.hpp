@@ -118,6 +118,7 @@ enum class LayerStyle {
 	OutlineUniform,
 	Lines,
 	Texture,
+	Debug
 };
 
 struct LayerStyleInfo {
@@ -175,6 +176,8 @@ private:
 	std::vector<GDProperties> fillOutlineUniform();
 	std::vector<GDProperties> fillLines();
 	std::vector<GDProperties> fillTexture();
+
+	std::vector<GDProperties> fillDebug();
 
 	static std::unordered_map<LayerStyle, LayerStyleInfo> layerStyleInfo;
 	

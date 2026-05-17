@@ -89,6 +89,16 @@ namespace Sculptor {
 		b = _b.lerp(_a, amount);
 	}
 
+	std::optional<float> Line::inverseLerp(CCPoint point) const {
+		if (contains(point)) {
+			return a.getDistance(point) / a.getDistance(b);
+		}
+		else {
+			return std::nullopt;
+		}
+
+	}
+
 	//
 
 	float Sequence::length() const {
@@ -117,7 +127,7 @@ namespace Sculptor {
 
 	CCRect Sequence::boundingBox() const {
 		auto rect = Clipper2Lib::GetBounds(asPath());
-		return { static_cast<float>(rect.left), static_cast<float>(rect.bottom), static_cast<float>(rect.right - rect.left), static_cast<float>(rect.top - rect.bottom) };
+		return { static_cast<float>(rect.left), static_cast<float>(rect.top), static_cast<float>(rect.right - rect.left), static_cast<float>(rect.bottom - rect.top) };
 	}
 
 	Lines Sequence::edges() const {
@@ -128,6 +138,16 @@ namespace Sculptor {
 		return lines;
 	}		
 
+	std::vector<int> Sequence::edgeIndicesContaining(const CCPoint& point) const {
+		std::vector<int> result;
+		for (const auto& [i, line] : std::views::enumerate(edges())) {
+			if (line.contains(point)) {
+				result.push_back(i);
+			}
+		}
+		return result;
+	}
+
 	Sequence Sequence::createDashedLine(const Line& line, float spacing, float width) {
 		Sequence sequence;
 		float count = std::floor(line.length() / spacing);
@@ -136,6 +156,19 @@ namespace Sculptor {
 			sequence.push_back(line.lerp((i + width) / count));
 		}
 		return sequence;
+	}
+
+	std::optional<float> Sequence::inverseLerp(const CCPoint& point) const {
+		auto indices = edgeIndicesContaining(point);
+		if (!indices.empty()) {
+			int i = indices.front();
+			float size = static_cast<float>(this->size()) - 1;
+			//log::info("inverseLerp, {}, point = {}, i = {}, Lerp from {}, to {}, mix = {}", points, point, i, (i / size), ((i + 1) / size), *edges()[i].inverseLerp(point));
+			return std::lerp((i / size), ((i + 1) / size), *edges()[i].inverseLerp(point));
+		}
+		else {
+			return std::nullopt;
+		}
 	}
 
 	//
@@ -177,6 +210,18 @@ namespace Sculptor {
 		return result;
 	}
 
+	bool Poly::contains(const CCPoint& point) const {
+		if (containsEdgePoint(point)) { return true; }
+		int hits = 0;
+		for (const auto& edge : edges()) {			
+			std::optional<CCPoint> p = edge.evaluate(point.x);
+			if (p && ((*p).y < point.y) && ((edge.a.x <= (*p).x && (*p).x < edge.b.x) || (edge.a.x > (*p).x && (*p).x >= edge.b.x))) {
+				hits++;
+			}
+		}
+		return (hits % 2 == 1);
+	}
+
 	CCPoint Poly::normalAt(const CCPoint& point) const {
 		CCPoint normal;
 		for (const auto& edge : edges()) {			
@@ -185,7 +230,7 @@ namespace Sculptor {
 		return normal.normalize();
 	}
 
-	CCPoint Poly::projectionOf(const CCPoint& point) {	
+	CCPoint Poly::projectionOf(const CCPoint& point) const {	
 		auto e = edges();
 		auto closestEdge = std::ranges::min_element(e, {}, [point](const Line& edge) { return point.getDistance(edge.projectionOf(point)); });
 		return closestEdge->projectionOf(point);
@@ -209,10 +254,9 @@ namespace Sculptor {
 		return fabsf(ab.dot(bc)) < 0.01f || fabsf(bc.dot(ca)) < 0.01f || fabsf(ca.dot(ab)) < 0.01f;
 	}
 
-	bool Triangle::isDegenerate() {
-		CCPoint ab = (b() - a()).normalize();
-		CCPoint ac = (c() - a()).normalize();		
-		return isClose(fabsf(ab.cross(ac)), 0);
+	bool Triangle::isDegenerate() {		
+		float altitude = (ab() * bc()) / pow(ca(), 2);		
+		return isClose(altitude, 0);
 	}
 
 	RightTrianglePair Triangle::orthogonalize() {
@@ -339,7 +383,7 @@ namespace Sculptor {
 		}
 		Sequence result;
 		result.push_back(points.front());		
-		int count = clamp(floor(curvature() * approximationSpacing), 5, 15);		
+		int count = clamp(floor(sqrt(curvature()) * approximationSpacing), 5, 15);		
 		for (int i = 1; i < count; i++) {
 			float t = static_cast<float>(i) / count;
 			result.push_back(evaluate(t));

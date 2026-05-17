@@ -173,15 +173,16 @@ std::unordered_map<LayerStyle, LayerStyleInfo> Layer::layerStyleInfo = {
 		"Texture", {
 			LayerProperty::Name::Color,
 			LayerProperty::Name::ZLayer},
-		[](Layer* layer) { return layer->fillTexture(); }}}
+		[](Layer* layer) { return layer->fillTexture(); }}},
+	{LayerStyle::Debug,  {
+		"Debug", {},
+		[](Layer* layer) { return layer->fillDebug(); }}},
 };
 
 
 std::vector<GDProperties> Layer::fillSolid() {
 	std::vector<GDProperties> result;	
-	form->bezierEditor->clear();
-	for (const auto& [i, triangle] : std::views::enumerate(form->getTriangulation())) {			
-		auto p = triangle.points;				
+	for (const auto& [i, triangle] : std::views::enumerate(form->getTriangulation())) {					
 		if (form->getApproximation().containsEdge(triangle.hypotenuse())) {
 			result.append_range(GDProperties::fromRightTriangleExterior(triangle));
 		}
@@ -221,6 +222,26 @@ std::vector<GDProperties> Layer::fillTexture() {
 
 	return result;
 }
+
+std::vector<GDProperties> Layer::fillDebug() {
+	std::vector<GDProperties> result;
+
+	CCRect bounds = form->getApproximation().boundingBox();
+	int countX = floor(bounds.size.width / gdUnit);
+	int countY = floor(bounds.size.height / gdUnit);
+	
+	for (int i = 0; i < countX; i++) {
+		for (int j = 0; j < countY; j++) {
+			CCPoint point = { bounds.origin.x + i * gdUnit, bounds.origin.y + j * gdUnit };
+			if (form->getApproximation().contains(point)) {
+				result.push_back(GDProperties({ {GDProperty::ID, (i % 2 != j % 2) ? 1 : 2}, {GDProperty::X, point.x}, {GDProperty::Y, point.y}, {GDProperty::ScaleX, 0.3f}, {GDProperty::ScaleY, 0.3f} }));
+			}
+		}
+	}
+	
+	return result;
+}
+
 
 
 

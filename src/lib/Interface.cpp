@@ -52,14 +52,14 @@ void GDProperties::applyGenericLayerProperties(Layer* layer) {
 		}
 	}	
 
-	auto color = layer->getProperty(LayerProperty::Name::Color)->evaluate(*this, layer);
+	auto color = layer->getProperty(LayerProperty::Name::Color);
 	if (color) {
-		properties[GDProperty::Color] = static_cast<int>(color);
+		properties[GDProperty::Color] = static_cast<int>(color->evaluate(*this, layer));
 	}
 
-	auto z = layer->getProperty(LayerProperty::Name::ZLayer)->evaluate(*this, layer);
+	auto z = layer->getProperty(LayerProperty::Name::ZLayer);
 	if (z) {
-		properties[GDProperty::ZLayer] = static_cast<int>(z);
+		properties[GDProperty::ZLayer] = static_cast<int>(z->evaluate(*this, layer));
 	}	
 }
 

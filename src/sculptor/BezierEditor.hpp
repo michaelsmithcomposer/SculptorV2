@@ -22,24 +22,15 @@ public:
 	void setDirty();
 	void setCurveDirty(int i);
 
-	void setCurves(BezierCurves curves) {
-		this->curves = std::move(curves);		
-		setDirty();
-	}
-	const BezierCurves& getCurves() const { return curves; }
-	BezierCurves& getCurves() { return curves; }
+	void setPoint(int curveIndex, int pointIndex, CCPoint point);
+	const CCPoint& getPoint(int curveIndex, int pointIndex) const { return curves.at(curveIndex).points.at(pointIndex); }
 
-	void setCurve(int index, BezierCurve curve) {
-		this->curves[index] = std::move(curve);
-		setCurveDirty(index);
-	}
+	void setCurve(int index, BezierCurve curve);
 	const BezierCurve& getCurve(int i) const { return curves.at(i); }
 
-	void setPoint(int curveIndex, int pointIndex, CCPoint point) {
-		this->curves[curveIndex][pointIndex] = std::move(point);
-		setCurveDirty(curveIndex);
-	}
-	const CCPoint& getPoint(int curveIndex, int pointIndex) const { return curves.at(curveIndex).points.at(pointIndex); }
+	void setCurves(BezierCurves curves);
+	const BezierCurves& getCurves() const { return curves; }
+	BezierCurves& getCurves() { return curves; }
 
 	void addCurve(int i, BezierCurve curve);
 	void removeCurve(int i);

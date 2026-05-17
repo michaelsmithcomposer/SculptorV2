@@ -34,6 +34,29 @@ bool BezierEditor::init(Form* form, BezierCurves curves) {
     return true;
 }
 
+void BezierEditor::setPoint(int curveIndex, int pointIndex, CCPoint point) {
+    this->curves[curveIndex][pointIndex] = std::move(point);    
+    setCurveDirty(curveIndex);
+    if (pointIndex == 0) {
+        setCurveDirty(safeModulo(curveIndex - 1, curves.size()));
+    }
+    else if (pointIndex == getCurve(curveIndex).size()) {
+        setCurveDirty(safeModulo(curveIndex + 1, curves.size()));
+    }    
+}
+
+void BezierEditor::setCurve(int index, BezierCurve curve) {
+    this->curves[index] = std::move(curve);    
+    setCurveDirty(index);
+    setCurveDirty(safeModulo(index - 1, curves.size()));
+    setCurveDirty(safeModulo(index + 1, curves.size()));   
+}
+
+void BezierEditor::setCurves(BezierCurves curves) {
+    this->curves = std::move(curves);
+    setDirty(); 
+}
+
 void BezierEditor::update(float dt) {
     startUpdate();
 
@@ -95,7 +118,7 @@ void BezierEditor::redraw() {
     for (const auto& curve : curves) {
         for (const auto& edge : curve.edges()) {
             Points dashes = Sequence::createDashedLine(edge, 4, 0.35).points;
-            drawLines(dashes.data(), dashes.size(), 0.23, { 1.0, 1.0, 1.0, 0.5 });
+            drawLines(dashes.data(), dashes.size(), 0.23, { 1.0, 1.0, 1.0, 0.35 });
         }
     }
 }
@@ -136,17 +159,19 @@ int BezierEditor::getNodeIndex(DragNode* node) {
 }
 
 int BezierEditor::curvePointToNodeIndex(int curveIndex, int pointIndex) {
+    int c = safeModulo(curveIndex, curves.size());
+    int p = safeModulo(pointIndex, curves[c].size());
     int index = 0;
-    for (int i = 0; i < curveIndex; i++) {
+    for (int i = 0; i < c; i++) {
         index += curves[i].size() - 1;
     }
-    return (index + pointIndex) % curves.size();
+    return index + p;
 }
 
 std::vector<std::pair<int, int>> BezierEditor::nodeToCurvePointIndices(int i) {   
     if (i == 0) {
-        return { std::make_pair(0, 0),
-                 std::make_pair(curves.size() - 1, curves.back().size() - 1)};
+        return { std::make_pair(curves.size() - 1, curves.back().size() - 1),
+                 std::make_pair(0, 0) };
     }
 
     int accum = 0;
@@ -185,9 +210,21 @@ DragNode* BezierEditor::addNode(CCPoint position) {
         }        
     };
     node->onRightClick = [this, node](CCPoint point) {
-        for (auto [curveIndex, pointIndex] : nodeToCurvePointIndices(getNodeIndex(node))) {
-            removePoint(curveIndex, pointIndex);           
+        auto indices = nodeToCurvePointIndices(getNodeIndex(node));
+        
+        if (indices.size() > 1) {
+            auto l = indices.front().first;
+            auto r = indices.back().first;            
+            setCurve(l, BezierCurve({ getCurve(l).front(), getCurve(r).back() }));
+            removeCurve(r);      
+            rebuildNodes();
         }
+        
+        else {
+            auto [curveIndex, pointIndex] = indices[0];
+            removePoint(curveIndex, pointIndex);            
+        }
+        
     };
     node->setPosition(position);
     nodes.push_back(node);
@@ -220,11 +257,40 @@ void BezierEditor::removeUINode() {
 
 void BezierEditor::updateUINode() {
     auto mouse = convertToNodeSpace(getMousePos());
-    auto projection = Poly::fromBezierCurves(curves).projectionOf(mouse);
+    CCPoint projection;   
+    bool ctrl = CCKeyboardDispatcher::get()->m_bControlPressed;    
+    projection = ctrl ? Poly::fromBezierCurves(curves).projectionOf(mouse) : getApproximation().projectionOf(mouse);   
     bool condition = (mouse.getDistance(projection) < visibilityRadius) && std::ranges::none_of(nodes, [projection](DragNode* node) { return node->getPosition().getDistance(projection) < visibilityRadius; });
-
+   
     if (!UINode && condition) {
         addUINode();
+        
+        UINode->onClick = [this](CCPoint point) {
+            if (CCKeyboardDispatcher::get()->m_bControlPressed) {
+                auto i = Poly::fromBezierCurves(curves).edgeIndicesContaining(point)[0];
+                auto [c, p] = nodeToCurvePointIndices(i).back();
+                addPoint(c, p + 1, point);                
+                nodes[i + 1]->simulateClick();
+                removeUINode();
+            }
+            else {
+                for (const auto& [i, seq] : std::views::enumerate(m_approximation)) {
+                    std::optional<float> t = seq.inverseLerp(point);
+                    if (t) {
+                        auto [l, r] = getCurve(i).split(*t);
+                        setCurve(i, l);                        
+                        addCurve(i + 1, r);                        
+                        nodes[curvePointToNodeIndex(i + 1, 0)]->simulateClick();
+                        removeUINode();
+                    }
+                }
+            }         
+        };
+        
+            
+             
+           
+               
     }
     else if (UINode && !condition) {
         removeUINode();
