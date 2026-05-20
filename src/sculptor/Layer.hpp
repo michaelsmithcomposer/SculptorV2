@@ -127,8 +127,7 @@ private:
 	Polys getDecompositionInflated();
 	RightTriangles getTriangulationInflated();
 
-	GDProperties buildObject(std::function<GDProperties(std::optional<GDProperties>)> func);	
-	bool objectNeedsRecreation(GameObject* object, const GDProperties& props);
+	GDProperties buildObject(std::function<GDProperties(std::optional<GDProperties>)> func);		
 
 	std::vector<GDProperties> fillSolid();
 	std::vector<GDProperties> fillOutline();

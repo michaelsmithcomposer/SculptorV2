@@ -112,13 +112,7 @@ void Layer::updateObjects() {
 			}
 		}
 		updateIDMap();	
-		for (const auto& [prop, obj] : std::views::zip(props, objectsByID[ID])) {
-			/*if (objectNeedsRecreation(obj, prop)) {
-				int index = std::ranges::find(objects, obj) - objects.begin();
-				EditorUI::get()->deleteObject(obj, false);
-				obj = EditorUI::get()->createObject(any_cast<int>(prop.properties.at(GDProperty::ID)), { 0, 0 });
-				objects[index] = obj;
-			}*/
+		for (const auto& [prop, obj] : std::views::zip(props, objectsByID[ID])) {		
 			prop.applyTo(obj);
 		}
 	}	
@@ -199,10 +193,6 @@ GDProperties Layer::buildObject(std::function<GDProperties(std::optional<GDPrope
 	props.properties[GDProperty::X] = any_cast<float>(props.properties.at(GDProperty::X)) + form->getPositionX();
 	props.properties[GDProperty::Y] = any_cast<float>(props.properties.at(GDProperty::Y)) + form->getPositionY();
 	return props;
-}
-
-bool Layer::objectNeedsRecreation(GameObject* object, const GDProperties& props) {
-	return ((object->m_baseColor->m_colorID != any_cast<int>(props.properties.at(GDProperty::Color)) || (static_cast<int>(object->m_zLayer) != any_cast<int>(props.properties.at(GDProperty::ZLayer)))));
 }
 
 std::vector<GDProperties> Layer::fillSolid() {

@@ -9,14 +9,14 @@ using namespace Sculptor;
 
 GameObject* GDProperties::applyTo(GameObject* object) const {
 	using enum GDProperty;
-	auto color = any_cast<int>(properties.at(Color));
+	
 	if (properties.contains(X)) object->setPositionX(any_cast<float>(properties.at(X)));
 	if (properties.contains(Y)) object->setPositionY(any_cast<float>(properties.at(Y)));
 	if (properties.contains(Rotation)) object->setRotation(any_cast<float>(properties.at(Rotation)));
 	if (properties.contains(ScaleX)) object->updateCustomScaleX(any_cast<float>(properties.at(ScaleX)));
 	if (properties.contains(ScaleY)) object->updateCustomScaleY(any_cast<float>(properties.at(ScaleY)));
 	if (properties.contains(ZLayer)) object->setCustomZLayer(any_cast<int>(properties.at(ZLayer)));	
-	if (properties.contains(Color)) object->setMainColorMode(color);
+	if (properties.contains(Color)) object->setMainColorMode(any_cast<int>(properties.at(Color)));
 	if (properties.contains(SecondaryColor)) object->setSecondaryColorMode(any_cast<int>(properties.at(SecondaryColor)));
 	if (properties.contains(Hue)) object->m_baseColor->m_hsv.h = any_cast<float>(properties.at(Hue));
 	if (properties.contains(Saturation)) object->m_baseColor->m_hsv.s = any_cast<float>(properties.at(Saturation));
@@ -32,6 +32,7 @@ GameObject* GDProperties::applyTo(GameObject* object) const {
 		}
 	}	
 
+	object->m_updateParents = true;
 	LevelEditorLayer::get()->updateObjectSection(object);
 	LevelEditorLayer::get()->reorderObjectSection(object);	
 
