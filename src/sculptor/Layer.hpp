@@ -128,7 +128,7 @@ private:
 	RightTriangles getTriangulationInflated();
 
 	GDProperties buildObject(std::function<GDProperties(std::optional<GDProperties>)> func);	
-	/*bool objectNeedsRecreation(GameObject* object, GDProperties& props);*/
+	bool objectNeedsRecreation(GameObject* object, const GDProperties& props);
 
 	std::vector<GDProperties> fillSolid();
 	std::vector<GDProperties> fillOutline();

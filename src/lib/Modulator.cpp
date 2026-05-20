@@ -14,7 +14,7 @@ std::unordered_map<Modulator::Type, ModulatorTypeInfo> Modulator::info = {
 		{Type::X, {"X", {ModulatorProperty::Name::Ramp}, [](Modulator* modulator, GDProperties& objProps, Layer* layer) { return modulator->evaluateX(objProps, layer); }, "mod_x.png"_spr, ccc3(255, 150, 150)}},
 		{Type::Y, {"Y", {ModulatorProperty::Name::Ramp}, [](Modulator* modulator, GDProperties& objProps, Layer* layer) { return modulator->evaluateY(objProps, layer); }, "mod_y.png"_spr, ccc3(150, 255, 150)}},
 		/*{Type::Perlin, {"Perlin", {}, [](Modulator* modulator, GDProperties& objProps, Layer* layer) { return modulator->evaluatePerlin(objProps, layer); }}},*/
-		{Type::Normal, {"Normal", {}, [](Modulator* modulator, GDProperties& objProps, Layer* layer) { return modulator->evaluateNormal(objProps, layer); }, "mod_noise.png"_spr, ccc3(150, 150, 255)}},
+		{Type::Normal, {"Normal", {}, [](Modulator* modulator, GDProperties& objProps, Layer* layer) { return modulator->evaluateNormal(objProps, layer); }, "mod_normal.png"_spr, ccc3(200, 100, 200)}},
 };
 
 std::unordered_map<ModulatorProperty::Name, ModulatorPropertyInfo> ModulatorProperty::info = {
