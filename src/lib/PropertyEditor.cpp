@@ -1,11 +1,31 @@
 #include <Geode/Geode.hpp>
 #include "../lib/PropertyEditor.hpp"
 #include "../sculptor/Layer.hpp"
+#include "../lib/Manager.hpp"
+#include "../lib/Modulator.hpp"
 
 using namespace geode::prelude;
 
-PropertyEditor* PropertyEditor::create(LayerProperty* property) {
-    auto node = new PropertyEditor();
+float ModulatableProperty::evaluate(GDProperties& objProps, Layer* layer) {
+    float result = value;
+    for (const auto& [modulator, amount] : modValues) {
+        result += amount * modulator->evaluate(objProps, layer);     
+    }
+    return result;
+}
+
+void ModulatableProperty::removeModulator(Modulator* modulator) {
+    auto it = modValues.find(modulator);
+    if (it != modValues.end()) {
+        modValues.erase(it);
+        if (onChanged) {
+            onChanged();
+        }
+    }
+}
+
+ModulatablePropertyEditor* ModulatablePropertyEditor::create(ModulatableProperty* property) {
+    auto node = new ModulatablePropertyEditor();
     if (node && node->init(property)) {
         node->autorelease();
         return node;
@@ -14,29 +34,20 @@ PropertyEditor* PropertyEditor::create(LayerProperty* property) {
     return nullptr;
 }
 
-bool PropertyEditor::init(LayerProperty* property) {
+bool ModulatablePropertyEditor::init(ModulatableProperty* property) {
     if (!CCNode::init()) return false;     
 
     this->property = property;
+        
+    //
 
-    createEditor();       
-
-    return true;
-}
-
-void PropertyEditor::setModSource(ModSource modSource) {
-    this->modSource = modSource;
-    modInput->setValue(property->getModValue(modSource));    
-}
-
-void PropertyEditor::createEditor() {
     setScale(0.5);
     CCSize size = { 160, 40 };
     float padding = 10;
 
     setContentSize(size);
 
-    base = NineSlice::create("square02b_001.png", { 0, 0, 80, 80 });
+    auto base = NineSlice::create("square02b_001.png", { 0, 0, 80, 80 });
     base->setScale(0.5);
     base->setColor({ 0, 0, 0 });
     base->setOpacity(45);
@@ -47,24 +58,91 @@ void PropertyEditor::createEditor() {
     node->setContentSize(size);
     node->setLayout(RowLayout::create());
 
-    valueInput = NumberInput::create(LayerProperty::info[property->name].filter);
+    valueInput = NumberInput::create(property->filter);    
     valueInput->setValue(property->getValue());
     valueInput->valueCallback = [this](float value) { this->property->setValue(value); };
     node->addChild(valueInput);
 
-    modInput = NumberInput::create(LayerProperty::info[property->name].filter);
-    modInput->setValue(property->getModValue(modSource));
-    modInput->valueCallback = [this](float value) { this->property->setModValue(modSource, value); };
+    modInput = NumberInput::create(property->filter);
+    modInput->setValue(property->getModValue(Manager::get()->selectedModulator));
+    modInput->setBaseColor(Modulator::info[Manager::get()->selectedModulator->type].color);
+    modInput->setHighlightColor({255, 255, 255});
+    modInput->valueCallback = [this](float value) { 
+        this->property->setModValue(Manager::get()->selectedModulator, value);
+        updateLabel();
+    };
     node->addChild(modInput);
     node->updateLayout();
 
     addChild(node);
 
-    auto labelProperty = CCLabelBMFont::create(LayerProperty::info[property->name].label.c_str(), "chatFont.fnt");
+    auto labelProperty = CCLabelBMFont::create(property->label.c_str(), "chatFont.fnt");
+    labelProperty->setID("label"_spr);
     labelProperty->setScale(0.75);
     addChildAtPosition(labelProperty, Anchor::Top, { 0, -4 });
 
-    auto labelMod = CCLabelBMFont::create("+-", "chatFont.fnt");
-    labelMod->setScale(0.75);
-    addChildAtPosition(labelMod, Anchor::Center, { 10, -5 });
+    updateLabel();
+
+    return true;
+    
+}
+
+void ModulatablePropertyEditor::updateLabel() {
+    auto label = static_cast<CCLabelBMFont*>(getChildByID("label"_spr));
+    auto str = std::string(label->getString());
+    str = str.substr(0, str.find("*"));    
+    std::vector <std::pair<int, ccColor3B>> colors;
+    for (const auto& [modulator, amount] : property->modValues) {
+        if (amount != 0) {
+            colors.push_back(std::make_pair(str.size(), Modulator::info[modulator->type].color));
+            str += "*";            
+        }
+    }
+    label->setString(str.c_str());
+    for (const auto& [i, color] : colors) {
+        static_cast<CCFontSprite*>(label->getChildByIndex(i))->setColor(color);
+    } 
+    
+}
+
+SinglePropertyEditor* SinglePropertyEditor::create(Property* property) {
+    auto node = new SinglePropertyEditor();
+    if (node && node->init(property)) {
+        node->autorelease();
+        return node;
+    }
+    delete node;
+    return nullptr;
+}
+
+bool SinglePropertyEditor::init(Property* property) {
+    if (!CCNode::init()) return false;
+
+    this->property = property;
+    
+    //
+
+    setScale(0.5);
+    CCSize size = { 80, 40 };
+    float padding = 10;
+
+    setContentSize(size);
+
+    auto base = NineSlice::create("square02b_001.png", { 0, 0, 80, 80 });
+    base->setScale(0.5);
+    base->setColor({ 0, 0, 0 });
+    base->setOpacity(45);
+    base->setContentSize({ size.width * 2 + padding, size.height * 2 + padding });
+    addChildAtPosition(base, Anchor::Center);    
+
+    valueInput = NumberInput::create(property->filter);	
+    valueInput->setValue(property->getValue());
+    valueInput->valueCallback = [this](float value) { this->property->setValue(value); }; 
+    addChildAtPosition(valueInput, Anchor::Center, { 0, -4 });
+
+    auto labelProperty = CCLabelBMFont::create(property->label.c_str(), "chatFont.fnt");
+    labelProperty->setScale(0.75);
+    addChildAtPosition(labelProperty, Anchor::Top, { 0, -4 });  
+
+    return true;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Geode/Geode.hpp>
+#include <ranges>
 #include "../external/clipper2/clipper.h"
 
 using namespace geode::prelude;
@@ -8,6 +9,8 @@ using namespace geode::prelude;
 namespace Sculptor {
 	
 	CCPoint moveTowards(CCPoint point, CCPoint target, float distance);
+
+	
 
 	using Points = std::vector<CCPoint>;
 
@@ -52,6 +55,8 @@ namespace Sculptor {
 		Sequence() = default;
 		Sequence(Points points) : points(std::move(points)) {}
 		Sequence(std::initializer_list<CCPoint> points) : points(points) {}
+		template <std::ranges::range R>
+		Sequence(R&& range) : points(std::ranges::begin(range), std::ranges::end(range)) {}
 
 		auto begin() const { return points.begin(); }
 		auto end() const { return points.end(); }
@@ -105,6 +110,9 @@ namespace Sculptor {
 
 	struct Poly : Sequence {
 
+		Poly() = default;
+		Poly(Sequence sequence) : Sequence(std::move(sequence)) {}
+
 		bool containsEdge(const Line& edge) const { return edgeIndex(edge).has_value(); }
 		std::optional<int> edgeIndex(const Line& edge) const;
 
@@ -119,6 +127,8 @@ namespace Sculptor {
 		CCPoint normalAt(const CCPoint& point) const;
 		CCPoint projectionOf(const CCPoint& point) const;
 	};
+
+	using Polys = std::vector<Poly>;
 
 	struct RightTriangle;
 	struct RightTrianglePair;
@@ -190,8 +200,12 @@ namespace Sculptor {
 	};	
 
 
-
+	struct Circle {
+		CCPoint origin;
+		float radius;
+	};
 	
+	RightTriangles triangulatePolygons(const Polys& polys);
 
 }
 

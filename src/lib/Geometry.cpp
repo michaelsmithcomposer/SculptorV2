@@ -392,4 +392,24 @@ namespace Sculptor {
 		return result;
 	}
 
+	RightTriangles triangulatePolygons(const Polys& polys) {
+		using namespace Clipper2Lib;
+		RightTriangles result;
+
+		PathsD paths;
+		PathsD triangles;
+		for (const auto& poly : polys) {
+			paths.push_back(poly.asPath());
+		}
+		Triangulate(paths, 6, triangles);
+		for (const auto& path : triangles) {
+			auto triangle = Triangle::create(ccp(path.at(0).x, path.at(0).y), ccp(path.at(1).x, path.at(1).y), ccp(path.at(2).x, path.at(2).y));
+			if (!triangle) continue;
+			RightTrianglePair pair = (*triangle).orthogonalize();
+			result.push_back(std::move(pair.left));
+			result.push_back(std::move(pair.right));
+		}
+		return result;
+	}
+
 }

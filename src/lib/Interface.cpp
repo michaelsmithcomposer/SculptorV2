@@ -9,13 +9,14 @@ using namespace Sculptor;
 
 GameObject* GDProperties::applyTo(GameObject* object) const {
 	using enum GDProperty;
+	auto color = any_cast<int>(properties.at(Color));
 	if (properties.contains(X)) object->setPositionX(any_cast<float>(properties.at(X)));
 	if (properties.contains(Y)) object->setPositionY(any_cast<float>(properties.at(Y)));
 	if (properties.contains(Rotation)) object->setRotation(any_cast<float>(properties.at(Rotation)));
 	if (properties.contains(ScaleX)) object->updateCustomScaleX(any_cast<float>(properties.at(ScaleX)));
 	if (properties.contains(ScaleY)) object->updateCustomScaleY(any_cast<float>(properties.at(ScaleY)));
-	if (properties.contains(ZLayer)) object->setCustomZLayer(any_cast<int>(properties.at(ZLayer)));
-	if (properties.contains(Color)) object->setMainColorMode(any_cast<int>(properties.at(Color)));
+	if (properties.contains(ZLayer)) object->setCustomZLayer(any_cast<int>(properties.at(ZLayer)));	
+	if (properties.contains(Color)) object->setMainColorMode(color);
 	if (properties.contains(SecondaryColor)) object->setSecondaryColorMode(any_cast<int>(properties.at(SecondaryColor)));
 	if (properties.contains(Hue)) object->m_baseColor->m_hsv.h = any_cast<float>(properties.at(Hue));
 	if (properties.contains(Saturation)) object->m_baseColor->m_hsv.s = any_cast<float>(properties.at(Saturation));
@@ -29,7 +30,10 @@ GameObject* GDProperties::applyTo(GameObject* object) const {
 		for (const auto& id : any_cast<std::vector<int>>(properties.at(Groups))) {
 			object->addToGroup(id);
 		}
-	}
+	}	
+
+	LevelEditorLayer::get()->updateObjectSection(object);
+	LevelEditorLayer::get()->reorderObjectSection(object);	
 
 	return object;
 }
@@ -76,32 +80,7 @@ GDProperties GDProperties::fromRightTriangle(const RightTriangle& triangle, bool
 	return props;
 }
 
-std::vector<GDProperties> GDProperties::fromRightTriangleInterior(const RightTriangle& triangle) {
-	std::vector<GDProperties> result;
-	result.push_back(GDProperties::fromRightTriangle(triangle, true));
-	Line hy = Line(triangle.a(), triangle.c());	
-	hy.shrink(0.1 * triangle.antialiasingWidth());
-	auto lineProps = GDProperties::fromLine(hy, triangle.antialiasingWidth());
-	if (lineProps) result.push_back(*lineProps);	
-	return result;
-}
-
-std::vector<GDProperties> GDProperties::fromRightTriangleExterior(const RightTriangle& triangle) {
-	std::vector<GDProperties> result;
-	result.push_back(GDProperties::fromRightTriangle(triangle));
-	Line hy = triangle.hypotenuse();
-	hy.shrink(0.1 * triangle.antialiasingWidth());
-	Line line = Line(hy.a - hy.normal() * triangle.antialiasingWidth() * 0.25, hy.b - hy.normal() * triangle.antialiasingWidth() * 0.25);
-	auto lineProps = GDProperties::fromLine(line, triangle.antialiasingWidth() * 0.5);
-	if (lineProps) result.push_back(*lineProps);	
-	return result;
-}
-
-std::optional<GDProperties> GDProperties::fromLine(const Line& line, float width) {
-
-	/*if (width < 0.15) {
-		return std::nullopt;
-	}*/
+GDProperties GDProperties::fromLine(const Line& line, float width) {	
 
 	using enum GDProperty;
 	GDProperties props = { {} };
@@ -112,6 +91,17 @@ std::optional<GDProperties> GDProperties::fromLine(const Line& line, float width
 	props.properties[Rotation] = static_cast<float>(-CC_RADIANS_TO_DEGREES(line.angle()));
 	props.properties[ScaleX] = line.length() / gdUnit;
 	props.properties[ScaleY] = width;
+	return props;
+}
+
+GDProperties GDProperties::fromCircle(const Circle& circle) {
+	using enum GDProperty;
+	GDProperties props = { {} };	
+	props.properties[ID] = nameID["circle-unit"];
+	props.properties[X] = circle.origin.x;
+	props.properties[Y] = circle.origin.y;	
+	props.properties[ScaleX] = (circle.radius * 2) / gdUnit;
+	props.properties[ScaleY] = (circle.radius * 2) / gdUnit;
 	return props;
 }
 

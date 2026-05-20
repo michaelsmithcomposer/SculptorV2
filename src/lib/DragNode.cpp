@@ -30,15 +30,15 @@ bool DragNode::init() {
     return true;
 }
 
-ListenerResult DragNode::handleMouseData(MouseInputData data) {
+ListenerResult DragNode::handleMouseData(MouseInputData data, bool doCallbacks) {
     if (data.action == MouseInputData::Action::Press) {     
         CCPoint mouse = convertToNodeSpace(getMousePos());         
         if (rangeContains(0, size, mouse.x) && rangeContains(0, size, mouse.y)) {
             drag = true;
             auto position = getPosition();
             offset = getParent()->convertToNodeSpace(getMousePos()) - position;
-            if (data.button == MouseInputData::Button::Left && onClick) { onClick(position); }
-            if (data.button == MouseInputData::Button::Right && onRightClick) { onRightClick(position); }
+            if (data.button == MouseInputData::Button::Left && onClick && doCallbacks) { onClick(position); }
+            if (data.button == MouseInputData::Button::Right && onRightClick && doCallbacks) { onRightClick(position); }
             return ListenerResult::Stop;
         }             
     }
@@ -64,5 +64,5 @@ void DragNode::update(float dt) {
 
 void DragNode::simulateClick() {
     MouseInputData data = MouseInputData(MouseInputData::Button::Left, MouseInputData::Action::Press, 0, {});
-    handleMouseData(data);
+    handleMouseData(data, false);
 }

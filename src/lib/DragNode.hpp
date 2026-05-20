@@ -33,7 +33,7 @@ private:
 	static constexpr float size = 6.f;
 	
 
-	ListenerResult handleMouseData(MouseInputData data);	
+	ListenerResult handleMouseData(MouseInputData data, bool doCallbacks = true);	
 
 	void update(float dt);
 };

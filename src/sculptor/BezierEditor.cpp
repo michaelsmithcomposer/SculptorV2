@@ -223,8 +223,32 @@ DragNode* BezierEditor::addNode(CCPoint position) {
         else {
             auto [curveIndex, pointIndex] = indices[0];
             removePoint(curveIndex, pointIndex);            
+        }        
+    };
+    node->onClick = [this, node](CCPoint point) {
+        if (CCKeyboardDispatcher::get()->m_bAltPressed) {
+            auto indices = nodeToCurvePointIndices(getNodeIndex(node));			
+            if (indices.size() > 1) {
+				auto [c0, p0] = indices.front();
+				auto [c1, p1] = indices.back();
+				auto left = getCurve(c0);
+				auto right = getCurve(c1);
+                left.points.append_range(right.points | std::views::drop(1));
+                setCurve(c0, left);
+				removeCurve(c1);
+				nodes[curvePointToNodeIndex(c0, p0)]->simulateClick();
+            }
+            else {
+                auto [c, p] = indices[0];
+                auto curve = getCurve(c);                
+                BezierCurve left(curve.points | std::views::take(p + 1));
+                BezierCurve right(curve.points | std::views::drop(p));
+				setCurve(c, left);
+                addCurve(c + 1, right);
+				nodes[curvePointToNodeIndex(c + 1, 0)]->simulateClick();
+
+            }
         }
-        
     };
     node->setPosition(position);
     nodes.push_back(node);
@@ -278,8 +302,14 @@ void BezierEditor::updateUINode() {
                     std::optional<float> t = seq.inverseLerp(point);
                     if (t) {
                         auto [l, r] = getCurve(i).split(*t);
-                        setCurve(i, l);                        
-                        addCurve(i + 1, r);                        
+                        if (CCKeyboardDispatcher::get()->m_bAltPressed) {
+                            setCurve(i, BezierCurve({ l.front(), l.back() }));
+                            addCurve(i + 1, BezierCurve({ r.front(), r.back() }));
+                        }
+                        else {                            
+                            setCurve(i, l);
+                            addCurve(i + 1, r);
+                        }                                               
                         nodes[curvePointToNodeIndex(i + 1, 0)]->simulateClick();
                         removeUINode();
                     }

@@ -3,6 +3,7 @@
 #include <Geode/Geode.hpp>
 #include "../sculptor/Layer.hpp"
 #include "../lib/Geometry.hpp"
+#include "../lib/Modulator.hpp"
 #include "../sculptor/BezierEditor.hpp"
 #include "../external/clipper2/clipper.h"
 
@@ -13,16 +14,18 @@ class Form : public CCNode {
 public:	
 
 	std::vector<Layer*> layers;
+	std::vector<Modulator*> modulators;
 	BezierEditor* bezierEditor;
 
 	static Form* create(BezierCurves curves);
 	bool init(BezierCurves curves);
+	void onExit();
 
 	const Poly& getApproximation() const {		
 		recalculateIfDirty();		
 		return m_approximation;
 	}
-	const Clipper2Lib::PathsD& getDecomposition() const {
+	const Polys& getDecomposition() const {
 		recalculateIfDirty();
 		return m_decomposition;
 	}
@@ -31,9 +34,11 @@ public:
 		return m_triangulation;
 	}
 
-
 	Layer* createLayer(const LayerStyle& style);
 	void removeLayer(Layer* layer);
+
+	Modulator* createModulator(const Modulator::Type& type);
+	void removeModulator(Modulator*);
 
 	void setDirty();
 	void recalculateIfDirty(bool force = false) const;
@@ -46,7 +51,7 @@ private:
 	mutable bool dirty;	
 
 	mutable Poly m_approximation;
-	mutable Clipper2Lib::PathsD m_decomposition;
+	mutable Polys m_decomposition;
 	mutable RightTriangles m_triangulation;
 
 	void update(float dt);
@@ -60,7 +65,7 @@ private:
 	
 
 	Poly calculateApproximation() const;
-	Clipper2Lib::PathsD calculateDecomposition() const;
+	Polys calculateDecomposition() const;
 	RightTriangles calculateTriangulation() const;
 	
 

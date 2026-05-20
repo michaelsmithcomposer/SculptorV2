@@ -46,7 +46,9 @@ public:
 
     static std::vector<GDProperties> fromRightTriangleExterior(const RightTriangle& triangle);
 
-    static std::optional<GDProperties> fromLine(const Line& line, float width);
+    static GDProperties fromLine(const Line& line, float width);
+
+    static GDProperties fromCircle(const Circle& circle);
 
     
 };

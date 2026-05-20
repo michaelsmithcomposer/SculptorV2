@@ -49,7 +49,7 @@ void NumberInput::onEnter() {
 
 void NumberInput::update(float dt) {    
     for (int i = 0; i < getString().size(); i++) {
-        spriteAtIndex(i)->setColor(ccc3(255, 255, 255));
+        spriteAtIndex(i)->setColor(colorBase);
     }
 
     if (!typing) {
@@ -86,6 +86,13 @@ void NumberInput::formatString(float value) {
     }
     auto str = padding + std::format("{:0{}.{}f}", clampedValue, count, decimalPrecision);    
     setString(str);
+    auto text = getChildByType<CCTextInputNode>(0)->getChildByType<CCLabelBMFont>(0);
+    if (clampedValue == 0) {
+        text->setOpacity(50);
+    }
+    else {
+        text->setOpacity(255);
+    }
 }
 
 ListenerResult NumberInput::handleScroll(double x, double y) {

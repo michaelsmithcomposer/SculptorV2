@@ -23,7 +23,7 @@ add_library(${PROJECT_NAME} SHARED ${SOURCES}
     "src/sculptor/Layer.cpp" 
     "src/sculptor/Form.cpp"
     "src/external/clipper.engine.cpp"
-    "src/external/clipper.triangulation.cpp" "src/sculptor/BezierEditor.cpp" "src/lib/DragNode.cpp")
+    "src/external/clipper.triangulation.cpp" "src/sculptor/BezierEditor.cpp" "src/lib/DragNode.cpp" "src/lib/Modulator.cpp")
 
 if (NOT DEFINED ENV{GEODE_SDK})
     message(FATAL_ERROR "Unable to find Geode SDK! Please define GEODE_SDK environment variable to point to Geode")

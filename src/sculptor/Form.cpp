@@ -2,6 +2,7 @@
 #include <ranges>
 #include "../sculptor/Layer.hpp"
 #include "../sculptor/Form.hpp"
+#include "../lib/Manager.hpp"
 #include "../sculptor/BezierEditor.hpp"
 #include "../external/clipper2/clipper.h"
 
@@ -30,6 +31,17 @@ bool Form::init(BezierCurves curves) {
     return true;
 }
 
+void Form::onExit() {
+	Manager::get()->selectedForm = nullptr;
+    Manager::get()->selectedLayer = nullptr;
+    Manager::get()->selectedModulator = nullptr;
+    for (auto& layer : layers) {
+        layer->deleteAllObjects();
+        delete layer;
+	}
+	CCNode::onExit();
+}
+
 void Form::update(float dt) {
     startUpdate();    
 
@@ -48,15 +60,41 @@ void Form::endUpdate() {
 
 Layer* Form::createLayer(const LayerStyle& style) {
     Layer* layer = new Layer(this, style);
-    this->layers.push_back(layer);
+    this->layers.push_back(layer);  
     return layer;
 }
 
 void Form::removeLayer(Layer* layer) {
     auto l = std::find(layers.begin(), layers.end(), layer);
     if (l != layers.end()) {
+        if (Manager::get()->selectedLayer == layer) {
+			Manager::get()->selectedLayer = nullptr;
+        }
+        layer->deleteAllObjects();
         delete *l;      
         layers.erase(l); 
+    }    
+}
+
+Modulator* Form::createModulator(const Modulator::Type& type) {
+    Modulator* modulator = new Modulator(this, type);
+    this->modulators.push_back(modulator);
+    return modulator;
+}
+
+void Form::removeModulator(Modulator* modulator) {
+    auto m = std::find(modulators.begin(), modulators.end(), modulator);
+    if (m != modulators.end()) {
+        if (Manager::get()->selectedModulator == modulator) {
+            Manager::get()->selectedModulator = nullptr;
+        }
+        for (auto& layer : layers) {
+            for (auto& [name, prop] : layer->properties) {
+                prop.removeModulator(modulator);
+            }
+        }
+        delete* m;
+        modulators.erase(m);
     }
 }
 
@@ -85,26 +123,18 @@ Poly Form::calculateApproximation() const {
 }
 
 
-PathsD Form::calculateDecomposition() const {        
+Polys Form::calculateDecomposition() const {         
+    Polys result;
     
-    PathD path = getApproximation().asPath();
-    return Union({ path }, FillRule::EvenOdd);
-    
+    PathsD paths = Union({ getApproximation().asPath() }, FillRule::EvenOdd);
+    for (const auto& path : paths) {
+        result.push_back(Sequence::fromPath(path));
+    }
+
+    return result;    
 }
 
 RightTriangles Form::calculateTriangulation() const {
-    RightTriangles result;
-
-    PathsD triangles;
-    Triangulate(getDecomposition(), 6, triangles);
-    for (const auto& path : triangles) {
-        auto triangle = Triangle::create(ccp(path.at(0).x, path.at(0).y), ccp(path.at(1).x, path.at(1).y), ccp(path.at(2).x, path.at(2).y));
-        if (!triangle) continue;
-        RightTrianglePair pair = (*triangle).orthogonalize();
-        result.push_back(std::move(pair.left));
-        result.push_back(std::move(pair.right));
-    }
-
-    return result;
+	return triangulatePolygons(getDecomposition());
 }
 

@@ -16,6 +16,9 @@ public:
 
     void setValue(float value);
 
+    void setBaseColor(ccColor3B color) { colorBase = color; }
+    void setHighlightColor(ccColor3B color) { colorHighlight = color; }
+
     std::function<void(float)> valueCallback;
 
 private:
@@ -31,7 +34,8 @@ private:
     float maxValue;
     float minValue;  
 
-    ccColor3B colorHighlight = { 185, 255, 179 };
+    ccColor3B colorBase = { 255, 255, 255 };
+    ccColor3B colorHighlight = { 200, 200, 200 };
 
     bool typing = false;   
 
