@@ -158,12 +158,42 @@ namespace Sculptor {
 		return sequence;
 	}
 
+	std::vector<float> Sequence::accumulatedLengths() const {
+		std::vector<float> lengths;
+		for (auto [i, edge] : std::views::enumerate(edges())) {
+			if (i == 0) {
+				lengths.push_back(edge.length());
+			}
+			else {
+				lengths.push_back(lengths.at(i - 1) + edge.length());
+			}
+		}
+		return lengths;
+	}
+
+	CCPoint Sequence::lerp(float t) const {
+		auto lengths = accumulatedLengths();
+		float length = t * lengths.back();
+		int index = 0;
+
+		for (auto [i, l] : std::views::enumerate(lengths)) {
+			if (length <= l) {
+				index = i;
+				break;
+			}
+		}
+		Line line = Line(points.at(index), points.at((index + 1) % this->points.size()));	
+		float offset = (index == 0) ? 0 : lengths.at(index - 1);
+		float line_t = (length - offset) / line.length();
+
+		return line.lerp(line_t);
+	}
+
 	std::optional<float> Sequence::inverseLerp(const CCPoint& point) const {
 		auto indices = edgeIndicesContaining(point);
 		if (!indices.empty()) {
 			int i = indices.front();
-			float size = static_cast<float>(this->size()) - 1;
-			//log::info("inverseLerp, {}, point = {}, i = {}, Lerp from {}, to {}, mix = {}", points, point, i, (i / size), ((i + 1) / size), *edges()[i].inverseLerp(point));
+			float size = static_cast<float>(this->size()) - 1;			
 			return std::lerp((i / size), ((i + 1) / size), *edges()[i].inverseLerp(point));
 		}
 		else {

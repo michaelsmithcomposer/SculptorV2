@@ -3,48 +3,55 @@
 
 using namespace geode::prelude;
 
-CCPoint polar(float radius, float theta) {
-    return ccp(radius * cos(theta), radius * sin(theta));
-}
+namespace Sculptor {
 
-float lerp(float a, float b, float mix) {
-	return a + (b - a) * mix;
-}
+	CCPoint polar(float radius, float theta) {
+		return ccp(radius * cos(theta), radius * sin(theta));
+	}
 
-float inverseLerp(float a, float b, float t) {
-	return (t - a) / (b - a);
-}
+	float lerp(float a, float b, float mix) {
+		return a + (b - a) * mix;
+	}
 
-float clamp(float value, float a, float b) {
-	float min = std::min(a, b);
-	float max = std::max(a, b);
-	return std::clamp(value, min, max);
-}
+	float inverseLerp(float a, float b, float t) {
+		return (t - a) / (b - a);
+	}
 
-float roundTo(float value, int places) {
-	double factor = std::pow(10.0, places);
-	return std::round(value * factor) / factor;
-}
+	float clamp(float value, float a, float b) {
+		float min = std::min(a, b);
+		float max = std::max(a, b);
+		return std::clamp(value, min, max);
+	}
 
-CCPoint roundTo(CCPoint value, int places) {
-	double factor = std::pow(10.0, places);
-	return ccp(roundTo(value.x, places), roundTo(value.y, places));
-}
+	float roundTo(float value, int places) {
+		double factor = std::pow(10.0, places);
+		return std::round(value * factor) / factor;
+	}
 
-bool isClose(float a, float b, float precision) {
-	return std::fabs(a - b) < precision;
-}
+	CCPoint roundTo(CCPoint value, int places) {
+		double factor = std::pow(10.0, places);
+		return ccp(roundTo(value.x, places), roundTo(value.y, places));
+	}
 
-bool isClose(CCPoint a, CCPoint b, float precision) {
-	return isClose(a.x, b.x, precision) && isClose(a.y, b.y, precision);	
-}
+	bool isClose(float a, float b, float precision) {
+		return std::fabs(a - b) < precision;
+	}
 
-bool rangeContains(float start, float end, float value) {
-	float min = std::min(start, end);
-	float max = std::max(start, end);
-	return ((value > min) || isClose(value, min)) && ((value < max) || (isClose(value, max)));
-}
+	bool isClose(CCPoint a, CCPoint b, float precision) {
+		return isClose(a.x, b.x, precision) && isClose(a.y, b.y, precision);
+	}
 
-int safeModulo(int a, int b) {
-	return (b + (a % b)) % b;
+	bool rangeContains(float start, float end, float value) {
+		float min = std::min(start, end);
+		float max = std::max(start, end);
+		return ((value > min) || isClose(value, min)) && ((value < max) || (isClose(value, max)));
+	}
+
+	int safeModulo(int a, int b) {
+		return (b + (a % b)) % b;
+	}
+
+	float msBetween(const std::chrono::steady_clock::time_point& start, const std::chrono::steady_clock::time_point& end) {
+		return std::chrono::duration<float, std::milli>(end - start).count();
+	}
 }

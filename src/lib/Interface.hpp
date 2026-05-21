@@ -2,81 +2,83 @@
 
 #include <Geode/Geode.hpp>
 #include "../lib/Geometry.hpp"
+#include "../external/validObjectIDs.hpp"
 
 
 using namespace geode::prelude;
-using namespace Sculptor;
 
-const float gdUnit = 30.f;
+namespace Sculptor {
 
-class Layer;
+    const float gdUnit = 30.f;
 
-enum class GDProperty {
-    ID,
-    X,
-    Y,
-    Rotation,
-    ScaleX,
-    ScaleY,
-    ZLayer,
-    Color,
-    SecondaryColor,
-    Hue,
-    Saturation,
-    Value,
-    Groups
-};
+    int validateID(int ID);
 
-class GDProperties {
-public:
+    class Layer;
 
-    std::unordered_map<GDProperty, std::any> properties;
+    enum class GDProperty {
+        ID,
+        X,
+        Y,
+        Rotation,
+        ScaleX,
+        ScaleY,
+        ZLayer,
+        Color,
+        SecondaryColor,
+        Hue,
+        Saturation,
+        Value,
+        Groups
+    };
 
-    GDProperties(std::unordered_map<GDProperty, std::any> properties) {
-        this->properties = properties;
-    }    
+    class GDProperties {
+    public:
 
-    GameObject* applyTo(GameObject* object) const;
+        std::unordered_map<GDProperty, std::any> properties;
 
-    void applyGenericLayerProperties(Layer* layer);
+        GDProperties(std::unordered_map<GDProperty, std::any> properties) {
+            this->properties = properties;
+        }
 
-    static GDProperties fromRightTriangle(const RightTriangle& triangle, bool inflateEpsilon = false);
+        GameObject* applyTo(GameObject* object) const;
 
-    static std::vector<GDProperties> fromRightTriangleInterior(const RightTriangle& triangle);
+        void applyGenericLayerProperties(Layer* layer);
 
-    static std::vector<GDProperties> fromRightTriangleExterior(const RightTriangle& triangle);
+        static GDProperties fromRightTriangle(const RightTriangle& triangle, bool inflateEpsilon = false);
 
-    static GDProperties fromLine(const Line& line, float width);
+        static GDProperties fromLine(const Line& line, float width);
 
-    static GDProperties fromCircle(const Circle& circle);
+        static GDProperties fromCircle(const Circle& circle);
 
-    
-};
 
+    };
 
 
 
 
 
-inline std::unordered_map<std::string, int> nameID = {
-    {"block", 1},
-    {"square-unit", 211},
-    {"square-half", 916},
-    {"square-quarter", 917},
-    {"circle-unit", 3621},
-    {"circle-big", 3637},
-    {"circle-quarter", 1764},
-    {"line", 1753},
-    {"line-thick", 1756},
-    {"glow-unit", 1888},
-    {"glow-half", 1886},
-    {"glow-quarter", 1887},
-    {"glow-line-quarter", 1292},
-    {"glow-corner-quarter", 1009},
-    {"triangle-unit", 693},
-    {"triangle-unit-stripe", 691},
-    {"triangle-unit-grid", 695},
-    {"triangle-unit-bevel", 699},
-    {"triangle-unit-tile", 713},
-    {"triangle-unit-brick", 701},
-};
+
+    inline std::unordered_map<std::string, int> nameID = {
+        {"block", 1},
+        {"square-unit", 211},
+        {"square-half", 916},
+        {"square-quarter", 917},
+        {"circle-unit", 3621},
+        {"circle-big", 3637},
+        {"circle-quarter", 1764},
+        {"line", 1753},
+        {"line-thick", 1756},
+        {"glow-unit", 1888},
+        {"glow-half", 1886},
+        {"glow-quarter", 1887},
+        {"glow-line-quarter", 1292},
+        {"glow-corner-quarter", 1009},
+        {"triangle-unit", 693},
+        {"triangle-unit-stripe", 691},
+        {"triangle-unit-grid", 695},
+        {"triangle-unit-bevel", 699},
+        {"triangle-unit-tile", 713},
+        {"triangle-unit-brick", 701},
+    };
+
+}

@@ -5,76 +5,79 @@
 #include "../lib/DragNode.hpp"
 
 using namespace geode::prelude;
-using namespace Sculptor;
 
-class Form;
+namespace Sculptor {
 
-class BezierEditor : public CCDrawNode {
-public:
+	class Form;
 
-	static BezierEditor* create(Form* form, BezierCurves curves);
-	bool init(Form* form, BezierCurves curves);
+	class BezierEditor : public CCDrawNode {
+	public:
 
-	Form* form;
+		static BezierEditor* create(Form* form, BezierCurves curves);
+		bool init(Form* form, BezierCurves curves);
 
-	const Poly getApproximation() const;
-	
-	void setDirty();
-	void setCurveDirty(int i);
+		Form* form;
 
-	void setPoint(int curveIndex, int pointIndex, CCPoint point);
-	const CCPoint& getPoint(int curveIndex, int pointIndex) const { return curves.at(curveIndex).points.at(pointIndex); }
+		const Poly getApproximation() const;
 
-	void setCurve(int index, BezierCurve curve);
-	const BezierCurve& getCurve(int i) const { return curves.at(i); }
+		void setDirty();
+		void setCurveDirty(int i);
 
-	void setCurves(BezierCurves curves);
-	const BezierCurves& getCurves() const { return curves; }
-	BezierCurves& getCurves() { return curves; }
+		void setPoint(int curveIndex, int pointIndex, CCPoint point);
+		const CCPoint& getPoint(int curveIndex, int pointIndex) const { return curves.at(curveIndex).points.at(pointIndex); }
 
-	void addCurve(int i, BezierCurve curve);
-	void removeCurve(int i);
+		void setCurve(int index, BezierCurve curve);
+		const BezierCurve& getCurve(int i) const { return curves.at(i); }
 
-	void addPoint(int curveIndex, int pointIndex, CCPoint point);
-	void removePoint(int curveIndex, int pointIndex);
+		void setCurves(BezierCurves curves);
+		const BezierCurves& getCurves() const { return curves; }
+		BezierCurves& getCurves() { return curves; }
 
-	int getNodeIndex(DragNode* node);
-	int curvePointToNodeIndex(int curveIndex, int pointIndex);
-	std::vector<std::pair<int, int>> nodeToCurvePointIndices(int i);
-	
-	void recalculateIfDirty(bool force = false);
+		void addCurve(int i, BezierCurve curve);
+		void removeCurve(int i);
 
-private:	
+		void addPoint(int curveIndex, int pointIndex, CCPoint point);
+		void removePoint(int curveIndex, int pointIndex);
 
-	BezierCurves curves;
+		int getNodeIndex(DragNode* node);
+		int curvePointToNodeIndex(int curveIndex, int pointIndex);
+		std::vector<std::pair<int, int>> nodeToCurvePointIndices(int i);
 
-	std::vector<DragNode*> nodes;
-	DragNode* UINode;	
+		void recalculateIfDirty(bool force = false);
 
-	std::vector<bool> dirty;
+	private:
 
-	mutable Sequences m_approximation;	
+		BezierCurves curves;
 
-	bool postUpdate;
-	static constexpr float visibilityRadius = 4.25f;
+		std::vector<DragNode*> nodes;
+		DragNode* UINode;
 
-	void update(float dt);
-	void startUpdate();
-	void endUpdate();
+		std::vector<bool> dirty;
 
-	void redraw();	
-	void redrawIfDirty();		
-	void rebuildNodes();
+		mutable Sequences m_approximation;
 
-	DragNode* addNode(CCPoint position);
-	void removeNode(DragNode* node);
-	void removeAllNodes();
+		bool postUpdate;
+		static constexpr float visibilityRadius = 4.25f;
 
-	DragNode* addUINode();
-	void removeUINode();
-	void updateUINode();
+		void update(float dt);
+		void startUpdate();
+		void endUpdate();
 
-	
+		void redraw();
+		void redrawIfDirty();
+		void rebuildNodes();
 
-	
-};
+		DragNode* addNode(CCPoint position);
+		void removeNode(DragNode* node);
+		void removeAllNodes();
+
+		DragNode* addUINode();
+		void removeUINode();
+		void updateUINode();
+
+
+
+
+	};
+
+}

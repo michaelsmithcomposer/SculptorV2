@@ -4,36 +4,36 @@
 #include "../lib/Geometry.hpp"
 
 using namespace geode::prelude;
-using namespace Sculptor;
 
-class DragNode : public CCDrawNode {
-public:
+namespace Sculptor {
 
-	static DragNode* create();
-	bool init();
+	class DragNode : public CCDrawNode {
+	public:
 
-	std::function<void(CCPoint)> onMove;
-	std::function<void(CCPoint)> onClick;
-	std::function<void(CCPoint)> onRightClick;		
-	std::function<void()> onMouseEnter;
-	std::function<void()> onMouseExit;
+		static DragNode* create();
+		bool init();
 
-	void simulateClick();
 
-private:
+		std::function<void(CCPoint)> onMove;
+		std::function<void(CCPoint)> onClick;
+		std::function<void(CCPoint)> onRightClick;
+		std::function<void()> onMouseEnter;
+		std::function<void()> onMouseExit;
 
-	ListenerHandle mouseListener;
+		void simulateClick();
 
-	
+	private:
 
-	bool drag = false;
-	CCPoint offset;
-	CCPoint lastPosition = { 0, 0 };	
+		ListenerHandle mouseListener;
 
-	static constexpr float size = 6.f;
-	
+		bool drag = false;
+		CCPoint offset;
+		CCPoint lastPosition = { 0, 0 };
 
-	ListenerResult handleMouseData(MouseInputData data, bool doCallbacks = true);	
+		static constexpr float size = 6.f;
+		ListenerResult handleMouseData(MouseInputData data, bool doCallbacks = true);
 
-	void update(float dt);
-};
+		void update(float dt);
+
+	};
+}

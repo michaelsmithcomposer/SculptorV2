@@ -6,87 +6,85 @@
 
 
 using namespace geode::prelude;
-using namespace Sculptor;
 
+namespace Sculptor {
 
-class Form;
+	class Form;
 
-struct ModulatorPropertyInfo {
-	std::string label;
-	float defaultValue;
-	CommonFilter filter;
-};
-
-class ModulatorProperty : public Property {
-public:
-
-	enum class Name {
-		Ramp
+	struct ModulatorPropertyInfo {
+		std::string label;
+		float defaultValue;
+		CommonFilter filter;
 	};
 
-	Name name;
+	class ModulatorProperty : public Property {
+	public:
 
-	ModulatorProperty(Name name) :
-		Property(info[name].label, info[name].filter, info[name].defaultValue), name(name) {
-	}
+		using Property::Property;
 
-	static std::unordered_map<Name, ModulatorPropertyInfo> info;
-};
+		enum class Name {
+			Ramp
+		};
 
-struct ModulatorTypeInfo {
-	std::string label;
-	std::vector<ModulatorProperty::Name> propertyNames;
-	std::function<float(Modulator*, GDProperties&, Layer*)> evaluate;
+		Name name;
 
-	std::string spriteName;
-	ccColor3B color;
-};
+		ModulatorProperty(Name name, std::optional<float> value = std::nullopt) :
+			Property(info[name].label, info[name].filter, info[name].defaultValue), name(name) {
+			if (value) {
+				setValue(*value);
+			}
+		}
 
-
-class Modulator {
-public:
-
-	enum class Type {
-		Noise,
-		X,
-		Y,
-		Perlin,
-		Normal,
-
-		Count
+		static std::unordered_map<Name, ModulatorPropertyInfo> info;
 	};
-	
-	Type type;
-	std::string label;
-	Form* form;
 
-	Modulator(Form* form, Type type) : form(form), type(type) {
-		label = info[type].label;
-		for (const auto& name : info[type].propertyNames) {
-			addProperty(name);
-		}		
-	}
-	Modulator(const Modulator&) = delete;
-	Modulator& operator=(const Modulator&) = delete;
+	struct ModulatorTypeInfo {
+		std::string label;
+		std::vector<ModulatorProperty::Name> propertyNames;
+		std::function<float(Modulator*, GDProperties&, Layer*)> evaluate;
 
-	void addProperty(ModulatorProperty::Name name);
-	ModulatorProperty* getProperty(ModulatorProperty::Name name);
-
-	float evaluate(GDProperties& objProps, Layer* layer) { return info[type].evaluate(this, objProps, layer); }
-
-	static std::unordered_map<Type, ModulatorTypeInfo> info;
-
-private:
-
-	std::unordered_map<ModulatorProperty::Name, ModulatorProperty> properties;
-
-	float evaluateNoise(GDProperties&, Layer*);
-	float evaluateX(GDProperties&, Layer*);
-	float evaluateY(GDProperties&, Layer*);
-	float evaluatePerlin(GDProperties&, Layer*);
-	float evaluateNormal(GDProperties&, Layer*);
-
-};
+		std::string spriteName;
+		ccColor3B color;
+	};
 
 
+	class Modulator {
+	public:
+
+		enum class Type {
+			Noise,
+			X,
+			Y,
+			Perlin,
+			Normal,
+
+			Count
+		};
+
+		Type type;
+		std::string label;
+		Form* form = nullptr;
+		std::unordered_map<ModulatorProperty::Name, ModulatorProperty> properties;
+
+		Modulator(Type type, std::optional<std::unordered_map<ModulatorProperty::Name, ModulatorProperty>> properties = std::nullopt);
+		Modulator(const Modulator&) = delete;
+		Modulator& operator=(const Modulator&) = delete;
+
+		ModulatorProperty* getProperty(ModulatorProperty::Name name);
+
+		float evaluate(GDProperties& objProps, Layer* layer) { return info[type].evaluate(this, objProps, layer); }
+
+		static std::unordered_map<Type, ModulatorTypeInfo> info;
+
+	private:
+
+		float evaluateNoise(GDProperties&, Layer*);
+		float evaluateX(GDProperties&, Layer*);
+		float evaluateY(GDProperties&, Layer*);
+		float evaluatePerlin(GDProperties&, Layer*);
+		float evaluateNormal(GDProperties&, Layer*);
+
+	};
+
+}
 

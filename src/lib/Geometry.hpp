@@ -56,7 +56,9 @@ namespace Sculptor {
 		Sequence(Points points) : points(std::move(points)) {}
 		Sequence(std::initializer_list<CCPoint> points) : points(points) {}
 		template <std::ranges::range R>
+			requires (!std::derived_from<std::remove_cvref_t<R>, Sequence>)
 		Sequence(R&& range) : points(std::ranges::begin(range), std::ranges::end(range)) {}
+		virtual ~Sequence() = default;
 
 		auto begin() const { return points.begin(); }
 		auto end() const { return points.end(); }
@@ -69,11 +71,13 @@ namespace Sculptor {
 		float length() const;
 		Clipper2Lib::PathD asPath() const;
 		static Sequence fromPath(Clipper2Lib::PathD path);		
-		Lines edges() const;	
+		virtual Lines edges() const;	
 
 		bool containsPoint(const CCPoint& point) const { return !edgeIndicesContaining(point).empty(); }
 		std::vector<int> edgeIndicesContaining(const CCPoint& point) const;
 
+		std::vector<float> accumulatedLengths() const;
+		CCPoint lerp(float t) const;
 		std::optional<float> inverseLerp(const CCPoint& point) const;
 
 		CCRect boundingBox() const;
@@ -85,6 +89,8 @@ namespace Sculptor {
 	using Sequences = std::vector<Sequence>;
 
 	struct BezierCurve : Sequence {
+
+		using Sequence::Sequence;
 
 		static constexpr int approximationDepth = 4;
 		static constexpr int arcLengthSamples = 100;

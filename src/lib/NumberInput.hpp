@@ -5,57 +5,61 @@
 
 using namespace geode::prelude;
 
-class NumberInput : public TextInput {
-public:
+namespace Sculptor {
 
-    static NumberInput* create(CommonFilter filter = CommonFilter::Float, std::optional<float> min = std::nullopt, std::optional<float> max = std::nullopt, std::optional<int> leading = std::nullopt, std::optional<int> precision = std::nullopt);
+    class NumberInput : public TextInput {
+    public:
 
-    bool init(CommonFilter filter, std::optional<float> min = std::nullopt, std::optional<float> max = std::nullopt, std::optional<int> leading = std::nullopt, std::optional<int> precision = std::nullopt);
+        static NumberInput* create(CommonFilter filter = CommonFilter::Float, std::optional<float> min = std::nullopt, std::optional<float> max = std::nullopt, std::optional<int> leading = std::nullopt, std::optional<int> precision = std::nullopt);
 
-    float getValue();
+        bool init(CommonFilter filter, std::optional<float> min = std::nullopt, std::optional<float> max = std::nullopt, std::optional<int> leading = std::nullopt, std::optional<int> precision = std::nullopt);
 
-    void setValue(float value);
+        float getValue();
 
-    void setBaseColor(ccColor3B color) { colorBase = color; }
-    void setHighlightColor(ccColor3B color) { colorHighlight = color; }
+        void setValue(float value);
 
-    std::function<void(float)> valueCallback;
+        void setBaseColor(ccColor3B color) { colorBase = color; }
+        void setHighlightColor(ccColor3B color) { colorHighlight = color; }
 
-private:
+        std::function<void(float)> valueCallback;
 
-    CommonFilter filter;
-    CCDrawNode* drawNode;
-    ListenerHandle mouseListener;
-    ListenerHandle scrollListener;
-    std::optional<int> focusIndex;
-    int minLeadingDigits;
-    int decimalPrecision;
+    private:
 
-    float maxValue;
-    float minValue;  
+        CommonFilter filter;
+        CCDrawNode* drawNode;
+        ListenerHandle mouseListener;
+        ListenerHandle scrollListener;
+        std::optional<int> focusIndex;
+        int minLeadingDigits;
+        int decimalPrecision;
 
-    ccColor3B colorBase = { 255, 255, 255 };
-    ccColor3B colorHighlight = { 200, 200, 200 };
+        float maxValue;
+        float minValue;
 
-    bool typing = false;   
+        ccColor3B colorBase = { 255, 255, 255 };
+        ccColor3B colorHighlight = { 200, 200, 200 };
 
-    void onEnter();
+        bool typing = false;
 
-    void update(float dt);
+        void onEnter();
 
-    void formatString(float value);
+        void update(float dt);
 
-    void handleMouseData(MouseInputData data);
+        void formatString(float value);
 
-    ListenerResult handleScroll(double x, double y);     
+        void handleMouseData(MouseInputData data);
 
-    void onTextEdit(const std::string& text);
-    
-    void setFocusIndex();
+        ListenerResult handleScroll(double x, double y);
 
-    int stringIndex(int i);
+        void onTextEdit(const std::string& text);
 
-    float magnitudeAtIndex(int i);
-  
-    CCFontSprite* spriteAtIndex(int i);
-};
+        void setFocusIndex();
+
+        int stringIndex(int i);
+
+        float magnitudeAtIndex(int i);
+
+        CCFontSprite* spriteAtIndex(int i);
+    };
+
+}
